@@ -8,14 +8,21 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Astroid SHOOT!')
 clock = pygame.time.Clock()
 
-shipW = 120
-shipH = 80
+#Background
+bgSurf = pygame.image.load("../sprites/background.png")
 
 
-shipSurf = pygame.Surface((shipW,shipH))
+#Ship
+shipSurf = pygame.image.load('../sprites/ship.png')
 shipRect = shipSurf.get_rect(center = (WIDTH/2, HEIGHT/2))
-shipX = WIDTH/2
-shipY = HEIGHT/2
+
+#gun
+gunSurf = pygame.image.load('../sprites/gun.png')
+
+#laser
+#clone the gun
+
+
 
 up = True
 right = True
@@ -29,48 +36,35 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-    
-    clock.tick(120)
+
+#         if event.type == pygame.MOUSEBUTTONUP:
+#             print(event.button)
+
+    clock.tick(200)
 
     #Section 1 - Sprites & Surfaces
             #BackGround, Player, Incoming Objects, Projectiles, Text
-    
+    gunRect = gunSurf.get_rect(midleft = (shipRect.midright))
+
     #ship
     screen.fill((0,0,0))
-    shipSurf.fill((155,155,155))
+    screen.blit(bgSurf,(0,0))
     screen.blit(shipSurf, shipRect)
-    
+    screen.blit(gunSurf, gunRect)
+
     #Section 2 - Controls (Interactions)
             #Movement (Mouse), Buttons (Projectiles)
+
+
+
+    shipRect.center = pygame.mouse.get_pos()
     
-    if shipX <= 0:
-        right = True
-        left = False
-    if shipY <= 0:
-        up = True
-        down = False
-    if shipX >= WIDTH - shipW: #FIX
-        left = True
-        right = False
-    if shipY >= HEIGHT - shipH:
-        down = True
-        up = False
-    
-    if up:
-        shipRect.y += 2
-    if right:
-        shipRect.x += 3
-    if left:
-        shipRect.x -= 3
-    if down:
-        shipRect.y -= 2
-    
-    
-    
+
+
     #Section 3 - Game Updates (Gameplay)
             #Mandatory: Movement Code Player, List for Asteroids, Iteration, Collisions
             #Extras: Score, Lives, Splits
-            
-    
+
+
     #Final Visual Update To User
     pygame.display.update()
