@@ -1,5 +1,6 @@
 import pygame, sys
 from pygame.locals import QUIT
+from random import randint, uniform
 
 #Global Setup
 pygame.init()
@@ -8,48 +9,87 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Astroid SHOOT!')
 clock = pygame.time.Clock()
 
+##########Functions
+#lasers
+def laserUpdate(laserList, speed):
+    for lasers in laserList:
+        lasers.y -= speed
+        if lasers.bottom < 0:
+            laserList.remove(lasers)
+#asteroids
+def astUpdate(astList, speed = 1):
+    for astTuple in astList:
+        direction = astTuple[1]
+        astRect = astTuple[0]
+        astRect.center += direction*speed
+        if astRect.top > HEIGHT:
+            astList.remove(astTuple)
+
+
+
+
 #Background
-bgSurf = pygame.image.load("../sprites/background.png")
+bgSurf = pygame.image.load("../sprites/bg.png").convert()
 
 
 #Ship
-shipSurf = pygame.image.load('../sprites/ship.png')
-shipRect = shipSurf.get_rect(center = (WIDTH/2, HEIGHT/2))
+shipSurf = pygame.image.load('../sprites/ship.png').convert()
+scaledShipSurf = pygame.transform.scale(shipSurf,(80,80))
+shipRect = scaledShipSurf.get_rect(center = (WIDTH/2, HEIGHT/2))
+
 
 #gun
-gunSurf = pygame.image.load('../sprites/gun.png')
+gunSurf = pygame.image.load('../sprites/gun.png').convert()
 
 #laser
-#clone the gun
+laserSurf = pygame.image.load('../sprites/laser.png').convert()
+laserList = []
+
+#asteroid
+astSurf = pygame.image.load('../sprites/asteroid.png').convert()
+astList = []
 
 
-
-up = True
-right = True
-left = False
-down = False
+pygame.mouse.set_visible(False)
+astTimer = pygame.event.custom_type()
+pygame.time.set_timer(astTimer, 500) #asteroid spawn rate
 
 #Game Loop
 while True:
-    #Close Game Event
+        #Close Game Event
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
 
-#         if event.type == pygame.MOUSEBUTTONUP:
-#             print(event.button)
+                #click for lasers
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                laserRect = laserSurf.get_rect(midbottom = gunRect.midtop)
+                laserList.append(laserRect)
+                
+                
+                #asteroids appear
+        if event.type == astTimer:
+            posX = randint(-100, WIDTH+100)
+            posY = randint(-100, -50)
+            astRect = astSurf.get_rect(center = (posX,posY))
+            direction = pygame.math.Vector2(uniform(-0.5,2.0),uniform(1.0,3.0))
+            astList.append((astRect,direction))
+        
 
     clock.tick(200)
+
 
     #Section 1 - Sprites & Surfaces
             #BackGround, Player, Incoming Objects, Projectiles, Text
     gunRect = gunSurf.get_rect(midleft = (shipRect.midright))
 
+
     #ship
     screen.fill((0,0,0))
     screen.blit(bgSurf,(0,0))
-    screen.blit(shipSurf, shipRect)
+    screen.blit(scaledShipSurf, shipRect)
     screen.blit(gunSurf, gunRect)
 
     #Section 2 - Controls (Interactions)
@@ -65,6 +105,39 @@ while True:
             #Mandatory: Movement Code Player, List for Asteroids, Iteration, Collisions
             #Extras: Score, Lives, Splits
 
+ #update lasers and asteroids
+    laserUpdate(laserList, 10)
+    astUpdate(astList)
+    
+#collisions
+    #ship collide
+    for astTuple in astList:
+        astRect = astTuple[0]
+        if shipRect.colliderect(astRect):
+            pygame.quit()
+            sys.exit()
+            
+    #laser collide
+    for astTuple in astList:
+        for laserRect in laserList:
+            if astTuple[0].colliderect(laserRect):
+                astList.remove(astTuple)
+                laserList.remove(laserRect)
+    
+    
+    #blit Lasers
+    for lasers in laserList:
+        screen.blit(laserSurf,lasers)
+        
+    #blit asteroids
+    for astTuple in astList:
+        screen.blit(astSurf, astTuple[0])
+    
+    
+    
+    
+    
+    
 
     #Final Visual Update To User
     pygame.display.update()
