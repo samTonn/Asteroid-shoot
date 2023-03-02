@@ -17,7 +17,7 @@ def laserUpdate(laserList, speed):
         if lasers.bottom < 0:
             laserList.remove(lasers)
 #asteroids
-def astUpdate(astList, speed = 1):
+def astUpdate(astList, speed = 2):
     for astTuple in astList:
         direction = astTuple[1]
         astRect = astTuple[0]
@@ -52,7 +52,7 @@ astList = []
 
 pygame.mouse.set_visible(False)
 astTimer = pygame.event.custom_type()
-pygame.time.set_timer(astTimer, 500) #asteroid spawn rate
+pygame.time.set_timer(astTimer, 300) #asteroid spawn rate
 
 #Game Loop
 while True:
@@ -74,7 +74,7 @@ while True:
             posX = randint(-100, WIDTH+100)
             posY = randint(-100, -50)
             astRect = astSurf.get_rect(center = (posX,posY))
-            direction = pygame.math.Vector2(uniform(-0.5,2.0),uniform(1.0,3.0))
+            direction = pygame.math.Vector2(uniform(-1.0,2.0),uniform(1.0,3.0))
             astList.append((astRect,direction))
         
 
