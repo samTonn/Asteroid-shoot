@@ -1,0 +1,81 @@
+import pygame, sys
+
+#Class Definitions
+class Ship(pygame.sprite.Sprite):
+  def __init__(self,groups):
+    super().__init__(groups)
+    self.image = pygame.image.load("Sprites/player.png").convert_alpha()
+    self.image_o = self.image
+    self.rect = self.image.get_rect(center =(SCREEN_W/2,SCREEN_H/2))
+    self.direction = 0
+      #https://www.reddit.com/r/pygame/comments/wpotwv/how_do_i_make_an_entity_move_forward_relative_to/
+  # Use to hold floats. Since Rects are only integers.
+    self.center = pygame.Vector2(self.rect.center)
+    self.vector = pygame.Vector2()
+    self.speed = 2
+
+
+  
+  def movement(self):
+    current_keys = pygame.key.get_pressed()
+    if current_keys[pygame.K_w]:
+      self.center += self.vector * self.speed
+      self.rect.center = self.center
+      
+    #Repeat this process for left/A and right/D - Rotozoom
+    if current_keys[pygame.K_a]:
+      self.direction += 1
+      #fix  vectors
+      print(self.direction)
+      print(self.vector)
+      self.vector.from_polar((1, self.direction))
+      print(self.vector)
+      
+      self.image = pygame.transform.rotozoom(self.image_o, self.direction, 1)
+      
+    if current_keys[pygame.K_d]:
+      self.direction -= 1
+      self.image = pygame.transform.rotozoom(self.image_o, self.direction, 1)
+
+    
+  def update(self):
+    self.movement()
+  
+    
+#Game Setup
+    
+pygame.init()
+pygame.display.set_caption('Asteroid Clone - OOP')
+SCREEN_W, SCREEN_H = 1280, 720 
+display_surface = pygame.display.set_mode((SCREEN_W, SCREEN_H))
+clock = pygame.time.Clock()
+
+#Game Files
+background = pygame.image.load("Sprites/background.png").convert()
+
+#Game Sprites
+spaceship_group = pygame.sprite.GroupSingle()
+ship = Ship(spaceship_group)
+
+
+#Main Game Loop
+while True:
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+      pygame.quit()
+      sys.exit()
+    
+  #Primary Background
+  display_surface.blit(background,(0,0))
+
+  #Delta Time - Managing Velocity and FR
+  dt = clock.tick() / 1000
+
+  #Updates
+  ship.update()
+  
+  #Draw Call - Sprites
+  spaceship_group.draw(display_surface)
+
+	#Draw Call - Final
+  pygame.display.update()
