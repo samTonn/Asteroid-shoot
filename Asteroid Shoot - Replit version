@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, math
 
 #Class Definitions
 class Ship(pygame.sprite.Sprite):
@@ -7,35 +7,50 @@ class Ship(pygame.sprite.Sprite):
     self.image = pygame.image.load("Sprites/player.png").convert_alpha()
     self.image_o = self.image
     self.rect = self.image.get_rect(center =(SCREEN_W/2,SCREEN_H/2))
-    self.direction = 0
-      #https://www.reddit.com/r/pygame/comments/wpotwv/how_do_i_make_an_entity_move_forward_relative_to/
-  # Use to hold floats. Since Rects are only integers.
-    self.center = pygame.Vector2(self.rect.center)
-    self.vector = pygame.Vector2()
-    self.speed = 2
+    self.current_angle = 90
+    self.speed = 1
+    self.x = SCREEN_W/2
+    self.y = SCREEN_H/2
 
 
   
   def movement(self):
+    center_o = self.rect.center
     current_keys = pygame.key.get_pressed()
     if current_keys[pygame.K_w]:
-      self.center += self.vector * self.speed
-      self.rect.center = self.center
       
+      self.x += self.speed * (math.cos(math.radians(self.current_angle)))
+      self.y -= self.speed * (math.sin(math.radians(self.current_angle)))
+
+      if self.x > SCREEN_W:
+        self.x = 1
+      if self.x < 1:
+        self.x = SCREEN_W - self.rect.x
+        
+      if self.y > SCREEN_H:
+        self.y = 0
+      if self.y < 0:
+        self.y = SCREEN_H + self.rect.y
+
+        
+      self.rect.center = (self.x, self.y)
+
     #Repeat this process for left/A and right/D - Rotozoom
     if current_keys[pygame.K_a]:
-      self.direction += 1
-      #fix  vectors
-      print(self.direction)
-      print(self.vector)
-      self.vector.from_polar((1, self.direction))
-      print(self.vector)
-      
-      self.image = pygame.transform.rotozoom(self.image_o, self.direction, 1)
+      self.current_angle += 1
+      if self.current_angle > 360:
+        self.current_angle = 0
       
     if current_keys[pygame.K_d]:
-      self.direction -= 1
-      self.image = pygame.transform.rotozoom(self.image_o, self.direction, 1)
+      self.current_angle -= 1
+      if self.current_angle < 0:
+        self.current_angle = 360
+      
+    #https://stackoverflow.com/questions/56709206/how-do-i-make-my-playership-rotate-      when-i-press-the-right-or-left-keys
+    if current_keys[pygame.K_a] or current_keys[pygame.K_d]:
+      self.image = pygame.transform.rotozoom(self.image_o, (self.current_angle - 90), 1.0)
+      self.rect = self.image.get_rect()
+      self.rect.center = center_o
 
     
   def update(self):
@@ -47,7 +62,7 @@ class Ship(pygame.sprite.Sprite):
 pygame.init()
 pygame.display.set_caption('Asteroid Clone - OOP')
 SCREEN_W, SCREEN_H = 1280, 720 
-display_surface = pygame.display.set_mode((SCREEN_W, SCREEN_H))
+display_surface = pygame.display.set_mode((SCREEN_W, SCREEN_H), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 
 #Game Files
